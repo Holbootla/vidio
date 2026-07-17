@@ -8,7 +8,7 @@ license.workspace = true
 [dependencies]
 serde = { workspace = true }
 time = { workspace = true }
-uuid = { workspace = true }
+uuid = { workspace = true, features = ["v4"] }
 thiserror = { workspace = true }
 argon2 = { workspace = true }
 jsonwebtoken = { workspace = true }
