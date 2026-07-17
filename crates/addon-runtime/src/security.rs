@@ -3,19 +3,13 @@ use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 use url::{Host, Url};
 
 /// Policy governing which add-on destinations are permitted.
-#[derive(Debug, Clone)]
+///
+/// Defaults to the secure policy (no private destinations, HTTPS only).
+#[derive(Debug, Clone, Default)]
 pub struct UrlPolicy {
     /// When true, private/loopback destinations and plain HTTP are allowed.
     /// Intended only for local development and tests — never in production.
     pub allow_private_networks: bool,
-}
-
-impl Default for UrlPolicy {
-    fn default() -> Self {
-        Self {
-            allow_private_networks: false,
-        }
-    }
 }
 
 impl UrlPolicy {
