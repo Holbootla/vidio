@@ -83,6 +83,28 @@ pub enum StreamKind {
     Unknown,
 }
 
+impl StreamKind {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            StreamKind::Url => "url",
+            StreamKind::YouTube => "youtube",
+            StreamKind::Torrent => "torrent",
+            StreamKind::External => "external",
+            StreamKind::Unknown => "unknown",
+        }
+    }
+
+    /// Whether the initial backend can hand this stream to clients for direct
+    /// playback. P2P/torrent and unrecognized sources are parsed but require a
+    /// local playback engine that the first backend release does not provide.
+    pub fn is_supported(&self) -> bool {
+        matches!(
+            self,
+            StreamKind::Url | StreamKind::YouTube | StreamKind::External
+        )
+    }
+}
+
 impl Stream {
     /// Classifies the stream's delivery mechanism.
     pub fn kind(&self) -> StreamKind {
@@ -169,5 +191,14 @@ mod tests {
     fn unknown_when_no_delivery_field() {
         let s: Stream = serde_json::from_str(r#"{"name":"x"}"#).unwrap();
         assert_eq!(s.kind(), StreamKind::Unknown);
+    }
+
+    #[test]
+    fn kind_support_and_naming() {
+        assert!(StreamKind::Url.is_supported());
+        assert!(StreamKind::External.is_supported());
+        assert!(!StreamKind::Torrent.is_supported());
+        assert!(!StreamKind::Unknown.is_supported());
+        assert_eq!(StreamKind::Torrent.as_str(), "torrent");
     }
 }

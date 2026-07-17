@@ -3,7 +3,10 @@
 
 use addon_runtime::{MockAddonClient, UrlPolicy};
 use application::services::AuthConfig;
-use application::{AddonService, AuthService, FixedClock, ProfileService};
+use application::{
+    AddonService, AuthService, DiscoveryConfig, DiscoveryService, FixedClock, PlaybackService,
+    ProfileService,
+};
 use auth::AccessTokenEncoder;
 use persistence::InMemoryRepositories;
 use std::sync::Arc;
@@ -54,6 +57,24 @@ impl Harness {
             self.addon_client.clone(),
             Arc::new(self.clock.clone()),
             UrlPolicy::secure(),
+        )
+    }
+
+    pub fn discovery(&self) -> DiscoveryService {
+        DiscoveryService::new(
+            self.repos.addons.clone(),
+            self.repos.profiles.clone(),
+            self.addon_client.clone(),
+            DiscoveryConfig::default(),
+        )
+    }
+
+    pub fn playback(&self) -> PlaybackService {
+        PlaybackService::new(
+            self.repos.addons.clone(),
+            self.repos.profiles.clone(),
+            self.addon_client.clone(),
+            DiscoveryConfig::default(),
         )
     }
 }

@@ -17,6 +17,8 @@ pub use clock::{Clock, FixedClock, SystemClock};
 pub use error::{AppError, AppResult, RepoError};
 pub use models::{NewSyncChange, SyncChange, SyncResourceKind};
 pub use services::{
-    AddonService, AuthConfig, AuthContext, AuthService, AuthTokens, DeviceInfo, ProfileService,
-    RegisterOutcome,
+    AddonService, AddonWarning, AuthConfig, AuthContext, AuthService, AuthTokens, CatalogRow,
+    DeviceInfo, DiscoveryConfig, DiscoveryResponse, DiscoveryService, PlaybackService,
+    ProfileService, RegisterOutcome, ResolvedStream, ResolvedSubtitle, StreamResolution,
+    SubtitleResolution,
 };
