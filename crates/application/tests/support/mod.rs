@@ -4,8 +4,8 @@
 use addon_runtime::{MockAddonClient, UrlPolicy};
 use application::services::AuthConfig;
 use application::{
-    AddonService, AuthService, DiscoveryConfig, DiscoveryService, FixedClock, PlaybackService,
-    ProfileService,
+    AddonService, AuthService, DiscoveryConfig, DiscoveryService, FixedClock, LibraryService,
+    PlaybackService, ProfileService, ProgressService, SyncService,
 };
 use auth::AccessTokenEncoder;
 use persistence::InMemoryRepositories;
@@ -76,6 +76,28 @@ impl Harness {
             self.addon_client.clone(),
             DiscoveryConfig::default(),
         )
+    }
+
+    pub fn library(&self) -> LibraryService {
+        LibraryService::new(
+            self.repos.library.clone(),
+            self.repos.profiles.clone(),
+            self.repos.changes.clone(),
+            Arc::new(self.clock.clone()),
+        )
+    }
+
+    pub fn progress(&self) -> ProgressService {
+        ProgressService::new(
+            self.repos.progress.clone(),
+            self.repos.profiles.clone(),
+            self.repos.changes.clone(),
+            Arc::new(self.clock.clone()),
+        )
+    }
+
+    pub fn sync(&self) -> SyncService {
+        SyncService::new(self.repos.changes.clone(), self.repos.profiles.clone())
     }
 }
 
