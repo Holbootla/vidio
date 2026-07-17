@@ -41,7 +41,9 @@ pub struct User {
     pub email: EmailAddress,
     pub password_hash: PasswordHash,
     pub status: UserStatus,
+    #[serde(with = "time::serde::rfc3339")]
     pub created_at: OffsetDateTime,
+    #[serde(with = "time::serde::rfc3339")]
     pub updated_at: OffsetDateTime,
 }
 

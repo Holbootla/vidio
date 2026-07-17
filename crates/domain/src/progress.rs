@@ -20,6 +20,7 @@ pub struct PlaybackProgress {
     /// Monotonic revision incremented on every accepted update.
     pub revision: u64,
     pub last_device_id: Option<DeviceId>,
+    #[serde(with = "time::serde::rfc3339")]
     pub updated_at: OffsetDateTime,
 }
 

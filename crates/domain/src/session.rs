@@ -24,7 +24,9 @@ pub struct Device {
     pub platform: DevicePlatform,
     pub display_name: String,
     pub app_version: Option<String>,
+    #[serde(with = "time::serde::rfc3339")]
     pub created_at: OffsetDateTime,
+    #[serde(with = "time::serde::rfc3339")]
     pub last_seen_at: OffsetDateTime,
 }
 
@@ -37,8 +39,11 @@ pub struct Session {
     pub device_id: DeviceId,
     /// SHA-256 hash (hex) of the opaque refresh token.
     pub refresh_token_hash: String,
+    #[serde(with = "time::serde::rfc3339")]
     pub issued_at: OffsetDateTime,
+    #[serde(with = "time::serde::rfc3339")]
     pub expires_at: OffsetDateTime,
+    #[serde(with = "time::serde::rfc3339::option")]
     pub revoked_at: Option<OffsetDateTime>,
     /// Set when this session's token was rotated, pointing to the successor.
     pub rotated_to: Option<SessionId>,

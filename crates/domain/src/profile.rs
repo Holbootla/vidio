@@ -49,7 +49,9 @@ pub struct Profile {
     pub preferences: ProfilePreferences,
     /// Monotonic version bumped on every mutation, used for optimistic sync.
     pub version: u64,
+    #[serde(with = "time::serde::rfc3339")]
     pub created_at: OffsetDateTime,
+    #[serde(with = "time::serde::rfc3339")]
     pub updated_at: OffsetDateTime,
 }
 

@@ -34,5 +34,6 @@ pub struct SyncChange {
     pub key: String,
     pub payload: serde_json::Value,
     pub deleted: bool,
+    #[serde(with = "time::serde::rfc3339")]
     pub created_at: OffsetDateTime,
 }

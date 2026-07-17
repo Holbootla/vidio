@@ -17,7 +17,9 @@ pub struct LibraryEntry {
     /// Raw meta preview JSON snapshot so the library renders without add-ons.
     pub meta_snapshot: Option<String>,
     pub removed: bool,
+    #[serde(with = "time::serde::rfc3339")]
     pub added_at: OffsetDateTime,
+    #[serde(with = "time::serde::rfc3339")]
     pub updated_at: OffsetDateTime,
 }
 

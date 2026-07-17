@@ -63,7 +63,9 @@ pub struct AddonInstallation {
     pub priority: i32,
     pub capabilities: AddonCapabilities,
     pub manifest_snapshot: String,
+    #[serde(with = "time::serde::rfc3339")]
     pub installed_at: OffsetDateTime,
+    #[serde(with = "time::serde::rfc3339")]
     pub updated_at: OffsetDateTime,
 }
 
