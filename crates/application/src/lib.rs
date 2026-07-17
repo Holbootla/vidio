@@ -16,4 +16,7 @@ pub mod services;
 pub use clock::{Clock, FixedClock, SystemClock};
 pub use error::{AppError, AppResult, RepoError};
 pub use models::{NewSyncChange, SyncChange, SyncResourceKind};
-pub use services::{AuthConfig, AuthContext, AuthService, AuthTokens, DeviceInfo, RegisterOutcome};
+pub use services::{
+    AddonService, AuthConfig, AuthContext, AuthService, AuthTokens, DeviceInfo, ProfileService,
+    RegisterOutcome,
+};
