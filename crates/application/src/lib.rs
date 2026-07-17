@@ -8,9 +8,12 @@
 
 pub mod clock;
 pub mod error;
+pub mod fanout;
 pub mod models;
 pub mod ports;
+pub mod services;
 
 pub use clock::{Clock, FixedClock, SystemClock};
 pub use error::{AppError, AppResult, RepoError};
 pub use models::{NewSyncChange, SyncChange, SyncResourceKind};
+pub use services::{AuthConfig, AuthContext, AuthService, AuthTokens, DeviceInfo, RegisterOutcome};

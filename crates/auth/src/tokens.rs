@@ -31,7 +31,12 @@ impl AccessTokenEncoder {
     pub fn new(secret: &[u8]) -> Self {
         let mut validation = Validation::new(Algorithm::HS256);
         validation.leeway = 0;
-        validation.validate_exp = true;
+        // Expiry is validated explicitly against the caller-provided clock in
+        // `decode`, so the injected time source fully controls token lifetime
+        // (jsonwebtoken's own check uses the system clock, which would break
+        // deterministic, clock-injected tests and services).
+        validation.validate_exp = false;
+        validation.required_spec_claims.remove("exp");
         Self {
             encoding: EncodingKey::from_secret(secret),
             decoding: DecodingKey::from_secret(secret),
