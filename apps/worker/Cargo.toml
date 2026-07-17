@@ -1,0 +1,18 @@
+[package]
+name = "worker"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "vidio-worker"
+path = "src/main.rs"
+
+[dependencies]
+tokio = { workspace = true }
+tracing = { workspace = true }
+application = { workspace = true }
+persistence = { workspace = true }
+addon-runtime = { workspace = true }
+telemetry = { workspace = true }

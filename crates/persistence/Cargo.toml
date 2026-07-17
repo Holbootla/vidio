@@ -1,0 +1,19 @@
+[package]
+name = "persistence"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[dependencies]
+serde = { workspace = true }
+uuid = { workspace = true }
+time = { workspace = true }
+thiserror = { workspace = true }
+async-trait = { workspace = true }
+domain = { workspace = true }
+application = { workspace = true }
+addon-protocol = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true }
