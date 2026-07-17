@@ -28,3 +28,4 @@ persistence = { workspace = true }
 tokio = { workspace = true }
 hyper = { workspace = true }
 http-body-util = "0.1"
+addon-runtime = { workspace = true, features = ["mock"] }
