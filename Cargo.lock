@@ -55,6 +55,7 @@ dependencies = [
  "http-api",
  "persistence",
  "telemetry",
+ "time",
  "tokio",
  "tracing",
 ]
