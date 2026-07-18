@@ -1,13 +1,13 @@
 import { http, HttpResponse } from "msw";
 import {
   PROFILE_ID,
-  addons,
   discoveryHome,
   discoverySearch,
   libraryEntries,
   movieMeta,
   seriesMeta,
 } from "@/test/fixtures/browse";
+import { addonListFixture, defaultPreferences } from "@/test/fixtures/settings";
 import {
   continueWatchingFixture,
   progressResponseFixture,
@@ -19,6 +19,8 @@ const API_BASE = "http://localhost:8080";
 const profileBase = `${API_BASE}/v1/profiles/${PROFILE_ID}`;
 
 let mutableLibrary: Array<Record<string, unknown>> = [...libraryEntries];
+let mutableAddons: Array<Record<string, unknown>> = [...addonListFixture];
+let mutablePreferences: Record<string, unknown> = { ...defaultPreferences };
 
 export const handlers = [
   http.get(`${API_BASE}/health`, () => HttpResponse.json({ status: "ok" })),
@@ -152,7 +154,159 @@ export const handlers = [
       watched: body.watched ?? progressResponseFixture.watched,
     });
   }),
-  http.get(`${profileBase}/addons`, () => HttpResponse.json(addons)),
+  http.get(`${profileBase}/addons`, () => HttpResponse.json(mutableAddons)),
+  http.post(`${profileBase}/addons`, async ({ request }) => {
+    const body = (await request.json()) as { transport_url: string };
+    if (body.transport_url === "fail-install") {
+      return HttpResponse.json(
+        {
+          type: "/errors/validation",
+          title: "Validation failed",
+          status: 422,
+          detail: "Invalid manifest",
+        },
+        { status: 422, headers: { "Content-Type": "application/problem+json" } },
+      );
+    }
+    const addon = {
+      id: "55555555-5555-7555-8555-555555555555",
+      manifest_id: "installed.example",
+      name: "Installed Add-on",
+      version: "1.0.0",
+      enabled: true,
+      priority: mutableAddons.length,
+      capabilities: {
+        resources: ["catalog"],
+        types: ["movie"],
+        id_prefixes: ["tt"],
+      },
+      installed_at: "2026-01-03T00:00:00Z",
+      updated_at: "2026-01-03T00:00:00Z",
+      transport_url: body.transport_url,
+    };
+    const { transport_url: _secret, ...publicAddon } = addon;
+    mutableAddons = [...mutableAddons, publicAddon];
+    return HttpResponse.json(publicAddon, { status: 201 });
+  }),
+  http.patch(`${profileBase}/addons/:installationId`, async ({ params, request }) => {
+    const body = (await request.json()) as { enabled?: boolean };
+    const installationId = params.installationId as string;
+    if (installationId === "fail-toggle") {
+      return HttpResponse.json(
+        {
+          type: "/errors/internal",
+          title: "Server error",
+          status: 500,
+          detail: "toggle failed",
+        },
+        { status: 500, headers: { "Content-Type": "application/problem+json" } },
+      );
+    }
+    let updated: Record<string, unknown> | null = null;
+    mutableAddons = mutableAddons.map((addon) => {
+      if (addon.id !== installationId) {
+        return addon;
+      }
+      updated = {
+        ...addon,
+        enabled: body.enabled ?? addon.enabled,
+        updated_at: "2026-01-04T00:00:00Z",
+      };
+      return updated;
+    });
+    if (!updated) {
+      return HttpResponse.json(
+        {
+          type: "/errors/not-found",
+          title: "Not found",
+          status: 404,
+        },
+        { status: 404, headers: { "Content-Type": "application/problem+json" } },
+      );
+    }
+    return HttpResponse.json(updated);
+  }),
+  http.post(`${profileBase}/addons/:installationId/refresh`, ({ params }) => {
+    const installationId = params.installationId as string;
+    let updated: Record<string, unknown> | null = null;
+    mutableAddons = mutableAddons.map((addon) => {
+      if (addon.id !== installationId) {
+        return addon;
+      }
+      updated = {
+        ...addon,
+        version: "1.0.1",
+        updated_at: "2026-01-05T00:00:00Z",
+      };
+      return updated;
+    });
+    if (!updated) {
+      return HttpResponse.json(
+        {
+          type: "/errors/not-found",
+          title: "Not found",
+          status: 404,
+        },
+        { status: 404, headers: { "Content-Type": "application/problem+json" } },
+      );
+    }
+    return HttpResponse.json(updated);
+  }),
+  http.delete(`${profileBase}/addons/:installationId`, ({ params }) => {
+    const installationId = params.installationId as string;
+    if (installationId === "fail-remove") {
+      return HttpResponse.json(
+        {
+          type: "/errors/internal",
+          title: "Server error",
+          status: 500,
+          detail: "remove failed",
+        },
+        { status: 500, headers: { "Content-Type": "application/problem+json" } },
+      );
+    }
+    mutableAddons = mutableAddons.filter((addon) => addon.id !== installationId);
+    return new HttpResponse(null, { status: 204 });
+  }),
+  http.post(`${profileBase}/addons/reorder`, async ({ request }) => {
+    const body = (await request.json()) as { order: string[] };
+    if (body.order.includes("fail-reorder")) {
+      return HttpResponse.json(
+        {
+          type: "/errors/internal",
+          title: "Server error",
+          status: 500,
+          detail: "reorder failed",
+        },
+        { status: 500, headers: { "Content-Type": "application/problem+json" } },
+      );
+    }
+    const byId = new Map(mutableAddons.map((addon) => [addon.id as string, addon]));
+    const reordered: Array<Record<string, unknown>> = [];
+    for (const [index, id] of body.order.entries()) {
+      const addon = byId.get(id);
+      if (addon) {
+        reordered.push({ ...addon, priority: index });
+      }
+    }
+    mutableAddons = reordered;
+    return HttpResponse.json(mutableAddons);
+  }),
+  http.get(`${profileBase}/preferences`, () => HttpResponse.json(mutablePreferences)),
+  http.put(`${profileBase}/preferences`, async ({ request }) => {
+    const body = (await request.json()) as Record<string, unknown>;
+    mutablePreferences = { ...body };
+    return HttpResponse.json({
+      id: PROFILE_ID,
+      user_id: "11111111-1111-7111-8111-111111111111",
+      name: "Main",
+      is_default: true,
+      preferences: mutablePreferences,
+      version: 2,
+      created_at: "2026-01-01T00:00:00Z",
+      updated_at: "2026-01-06T00:00:00Z",
+    });
+  }),
   http.get(`${profileBase}/library`, () => HttpResponse.json(mutableLibrary)),
   http.post(`${profileBase}/library`, async ({ request }) => {
     const body = (await request.json()) as {
@@ -206,20 +360,20 @@ function authResponse() {
     refresh_token: "refresh-token",
     refresh_expires_at: "2027-12-31T23:59:59Z",
     profile: {
-      id: "22222222-2222-7222-8222-222222222222",
+      id: PROFILE_ID,
       user_id: "11111111-1111-7111-8111-111111111111",
       name: "Main",
       is_default: true,
-      preferences: {
-        locale: "en-US",
-        subtitle_languages: [],
-        audio_languages: [],
-        preferred_qualities: [],
-        hide_p2p_streams: false,
-      },
+      preferences: defaultPreferences,
       version: 1,
       created_at: "2026-01-01T00:00:00Z",
       updated_at: "2026-01-01T00:00:00Z",
     },
   };
+}
+
+export function resetTestState() {
+  mutableLibrary = [...libraryEntries];
+  mutableAddons = [...addonListFixture];
+  mutablePreferences = { ...defaultPreferences };
 }
