@@ -1,0 +1,48 @@
+# Fly.io deployment for Vidio.
+#
+# One config, three apps (one per environment). The CI deploy workflow passes
+# `--app vidio-dev | vidio-staging | vidio-prod`, which overrides `app` below.
+# Two process groups share this image: `api` (HTTP) and `worker` (background).
+
+app = "vidio-prod"
+primary_region = "fra"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  VIDIO_BIND_ADDR = "0.0.0.0:8080"
+  RUST_LOG = "info"
+
+# Process groups: which command each machine runs.
+[processes]
+  api = "vidio-api"
+  worker = "vidio-worker"
+
+# Public HTTP is served only by the `api` process group.
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 1
+  processes = ["api"]
+
+  [[http_service.checks]]
+    interval = "15s"
+    timeout = "2s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/health"
+
+# API machines.
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"
+  processes = ["api"]
+
+# Worker machines (no public port; smaller footprint).
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
+  processes = ["worker"]

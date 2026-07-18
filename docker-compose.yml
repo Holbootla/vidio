@@ -1,0 +1,35 @@
+# Local / small self-hosted deployment.
+#
+# Usage:
+#   VIDIO_ACCESS_TOKEN_SECRET=$(openssl rand -base64 48) docker compose up --build
+#
+# Storage is currently in-memory, so `api` and `worker` do not share state and
+# the worker is a heartbeat skeleton. Both are included so the topology matches
+# production once the PostgreSQL adapter lands.
+
+services:
+  api:
+    build: .
+    image: vidio:local
+    command: ["vidio-api"]
+    ports:
+      - "8080:8080"
+    environment:
+      VIDIO_BIND_ADDR: 0.0.0.0:8080
+      VIDIO_ACCESS_TOKEN_SECRET: ${VIDIO_ACCESS_TOKEN_SECRET:?set VIDIO_ACCESS_TOKEN_SECRET (>=32 bytes)}
+      VIDIO_ACCESS_TOKEN_TTL_SECS: ${VIDIO_ACCESS_TOKEN_TTL_SECS:-900}
+      VIDIO_REFRESH_TOKEN_TTL_SECS: ${VIDIO_REFRESH_TOKEN_TTL_SECS:-2592000}
+      VIDIO_ADDON_FETCH_TIMEOUT_MS: ${VIDIO_ADDON_FETCH_TIMEOUT_MS:-8000}
+      VIDIO_ADDON_ALLOW_PRIVATE_NETWORKS: ${VIDIO_ADDON_ALLOW_PRIVATE_NETWORKS:-false}
+      RUST_LOG: ${RUST_LOG:-info}
+    restart: unless-stopped
+
+  worker:
+    build: .
+    image: vidio:local
+    command: ["vidio-worker"]
+    environment:
+      RUST_LOG: ${RUST_LOG:-info}
+    restart: unless-stopped
+    # The worker has no HTTP port, so it uses the image default (no override
+    # needed); compose does not run the image HEALTHCHECK against it by design.
