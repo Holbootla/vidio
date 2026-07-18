@@ -40,9 +40,9 @@ Maps user-facing features and critical mutations to automated tests. Run unit te
 | **WCAG axe primary pages**            | —                                                               | `e2e/accessibility.spec.ts`                         |
 | **Performance budgets**               | —                                                               | `scripts/check-performance.mjs` (`pnpm perf:check`) |
 
-## Counts (Milestone 6)
+## Current counts
 
-- **Vitest files:** 41
-- **Vitest tests:** 118
+- **Vitest files:** 43
+- **Vitest tests:** 135
 - **E2E spec files:** 6
 - **E2E test cases:** 15 (including 8 axe page scans)
