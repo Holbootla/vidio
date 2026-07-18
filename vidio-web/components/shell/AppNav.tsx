@@ -12,7 +12,7 @@ const navItems = [
   { href: "/discover", labelKey: "discover", icon: Compass },
   { href: "/search", labelKey: "search", icon: Search },
   { href: "/library", labelKey: "library", icon: Library },
-  { href: "/settings/account", labelKey: "settings", icon: Settings },
+  { href: "/settings/addons", labelKey: "settings", icon: Settings },
 ] as const;
 
 export function AppNav() {
