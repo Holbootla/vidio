@@ -65,8 +65,32 @@ async fn run() -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-/// Resolves when the process receives Ctrl-C, enabling graceful shutdown.
+/// Resolves on Ctrl-C or `SIGTERM`, enabling graceful shutdown.
+///
+/// Containers (Docker, Fly.io, Kubernetes) send `SIGTERM` on stop/rollout, so
+/// both signals must be handled for clean in-flight request draining.
 async fn shutdown_signal() {
-    let _ = tokio::signal::ctrl_c().await;
+    let ctrl_c = async {
+        let _ = tokio::signal::ctrl_c().await;
+    };
+
+    #[cfg(unix)]
+    let terminate = async {
+        use tokio::signal::unix::{signal, SignalKind};
+        match signal(SignalKind::terminate()) {
+            Ok(mut stream) => {
+                stream.recv().await;
+            }
+            Err(error) => tracing::warn!(%error, "failed to install SIGTERM handler"),
+        }
+    };
+
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
     tracing::info!("shutdown signal received");
 }
