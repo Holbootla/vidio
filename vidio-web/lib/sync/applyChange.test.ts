@@ -119,9 +119,7 @@ describe("applySyncChange", () => {
 
   it("removes progress marked watched from continue watching", () => {
     const queryClient = createClient();
-    queryClient.setQueryData(queryKeys.continueWatching(PROFILE_ID), [
-      continueWatchingFixture[0],
-    ]);
+    queryClient.setQueryData(queryKeys.continueWatching(PROFILE_ID), [continueWatchingFixture[0]]);
 
     applySyncChange(
       {

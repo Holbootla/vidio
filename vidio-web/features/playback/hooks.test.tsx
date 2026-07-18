@@ -83,19 +83,22 @@ describe("playback hooks and api", () => {
     const client = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
     });
-    client.setQueryData(["continueWatching", PROFILE_ID], [
-      {
-        profile_id: PROFILE_ID,
-        video_key: "movie:imdb:tt1254207",
-        media_key: "movie:imdb:tt1254207",
-        position_secs: 900,
-        duration_secs: 3600,
-        watched: false,
-        revision: 1,
-        last_device_id: null,
-        updated_at: "2026-01-03T00:00:00Z",
-      },
-    ]);
+    client.setQueryData(
+      ["continueWatching", PROFILE_ID],
+      [
+        {
+          profile_id: PROFILE_ID,
+          video_key: "movie:imdb:tt1254207",
+          media_key: "movie:imdb:tt1254207",
+          position_secs: 900,
+          duration_secs: 3600,
+          watched: false,
+          revision: 1,
+          last_device_id: null,
+          updated_at: "2026-01-03T00:00:00Z",
+        },
+      ],
+    );
     const wrapper = ({ children }: { children: React.ReactNode }) => (
       <QueryClientProvider client={client}>{children}</QueryClientProvider>
     );
