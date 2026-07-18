@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { ApiError } from "@/lib/api/errors";
 import { clientAuthSessionSchema } from "@/lib/api/schemas";
 import {
   buildClearRefreshCookie,
@@ -36,7 +37,9 @@ export async function POST() {
     return response;
   } catch (error) {
     const response = problemResponse(error);
-    response.headers.set("Set-Cookie", buildClearRefreshCookie());
+    if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
+      response.headers.set("Set-Cookie", buildClearRefreshCookie());
+    }
     return response;
   }
 }
