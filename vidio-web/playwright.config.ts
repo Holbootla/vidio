@@ -4,10 +4,11 @@ const MOCK_API_PORT = process.env.MOCK_API_PORT ?? "18080";
 const WEB_PORT = process.env.PLAYWRIGHT_PORT ?? "3100";
 const mockApiUrl = `http://127.0.0.1:${MOCK_API_PORT}`;
 const webUrl = `http://127.0.0.1:${WEB_PORT}`;
+const standaloneStart = "node scripts/prepare-standalone.mjs && node .next/standalone/server.js";
 
 const appServerCommand = process.env.CI
-  ? `pnpm start -p ${WEB_PORT}`
-  : `NEXT_PUBLIC_API_BASE_URL=${mockApiUrl} VIDIO_API_BASE_URL=${mockApiUrl} pnpm build && pnpm start -p ${WEB_PORT}`;
+  ? standaloneStart
+  : `NEXT_PUBLIC_API_BASE_URL=${mockApiUrl} VIDIO_API_BASE_URL=${mockApiUrl} pnpm build && ${standaloneStart}`;
 
 export default defineConfig({
   testDir: "./e2e",
