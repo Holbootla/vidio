@@ -183,11 +183,57 @@ describe("flush error classification", () => {
       isPermanentFlushError(new ApiError({ type: "/errors/validation", title: "x", status: 422 })),
     ).toBe(true);
     expect(
+      isPermanentFlushError(
+        new ApiError({ type: "/errors/unauthorized", title: "x", status: 401 }),
+      ),
+    ).toBe(false);
+    expect(
+      isPermanentFlushError(new ApiError({ type: "/errors/forbidden", title: "x", status: 403 })),
+    ).toBe(false);
+    expect(
       isPermanentFlushError(new ApiError({ type: "/errors/internal", title: "x", status: 500 })),
     ).toBe(false);
+    expect(
+      isRetryableFlushError(
+        new ApiError({ type: "/errors/unauthorized", title: "x", status: 401 }),
+      ),
+    ).toBe(true);
     expect(
       isRetryableFlushError(new ApiError({ type: "/errors/internal", title: "x", status: 500 })),
     ).toBe(true);
     expect(isRetryableFlushError(new TypeError("network"))).toBe(true);
+  });
+});
+
+describe("flushOfflineQueue auth failures", () => {
+  it("halts and retains queued mutations on 401", async () => {
+    server.use(
+      http.post(`${profileBase}/library`, () =>
+        HttpResponse.json(
+          {
+            type: "/errors/unauthorized",
+            title: "Unauthorized",
+            status: 401,
+            detail: "session expired",
+          },
+          { status: 401, headers: { "Content-Type": "application/problem+json" } },
+        ),
+      ),
+    );
+
+    await enqueueOfflineMutation(PROFILE_ID, {
+      type: "library_add",
+      body: {
+        content_type: "movie",
+        content_id: "tt1",
+        manifest_id: "org.stremio.cinemeta",
+        name: "One",
+      },
+    });
+
+    const result = await flushOfflineQueue(PROFILE_ID);
+    expect(result.flushed).toBe(0);
+    expect(result.discarded).toHaveLength(0);
+    expect(result.halted).toBe(true);
   });
 });

@@ -12,6 +12,9 @@ export function isPermanentFlushError(error: unknown): boolean {
   if (!(error instanceof ApiError)) {
     return false;
   }
+  if (error.status === 401 || error.status === 403) {
+    return false;
+  }
   if (error.status === 408 || error.status === 429) {
     return false;
   }
@@ -23,6 +26,9 @@ export function isPermanentFlushError(error: unknown): boolean {
 
 export function isRetryableFlushError(error: unknown): boolean {
   if (error instanceof ApiError) {
+    if (error.status === 401 || error.status === 403) {
+      return true;
+    }
     if (error.status === 408 || error.status === 429 || error.status >= 500) {
       return true;
     }
