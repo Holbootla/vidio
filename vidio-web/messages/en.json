@@ -1,0 +1,40 @@
+{
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "profileName": "Profile name",
+    "login": "Sign in",
+    "register": "Create account",
+    "logout": "Sign out",
+    "loginTitle": "Welcome back",
+    "loginSubtitle": "Sign in to continue watching on Vidio.",
+    "registerTitle": "Create your account",
+    "registerSubtitle": "Start with a default profile and personalize later.",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "signUp": "Sign up",
+    "signIn": "Sign in"
+  },
+  "marketing": {
+    "title": "Your media, unified",
+    "subtitle": "Browse add-on catalogs, build your library, and pick up where you left off.",
+    "getStarted": "Get started",
+    "signIn": "Sign in"
+  },
+  "nav": {
+    "board": "Board",
+    "discover": "Discover",
+    "search": "Search",
+    "library": "Library",
+    "settings": "Settings"
+  },
+  "board": {
+    "title": "Board",
+    "emptyTitle": "Your board is ready",
+    "emptyDescription": "Install add-ons in settings to populate catalog rows. Discovery arrives in the next milestone."
+  },
+  "common": {
+    "loading": "Loading",
+    "skipToContent": "Skip to main content"
+  }
+}
