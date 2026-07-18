@@ -1,6 +1,8 @@
 "use client";
 
+import { useRef } from "react";
 import { Button } from "@/components/ui/button";
+import { useFocusTrap } from "@/lib/hooks/use-focus-trap";
 
 interface KeyboardHelpProps {
   open: boolean;
@@ -18,12 +20,16 @@ const SHORTCUTS = [
 ];
 
 export function KeyboardHelp({ open, onClose }: KeyboardHelpProps) {
+  const dialogRef = useRef<HTMLDivElement>(null);
+  useFocusTrap(dialogRef, open, onClose);
+
   if (!open) {
     return null;
   }
 
   return (
     <div
+      ref={dialogRef}
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4"
       role="dialog"
       aria-modal="true"

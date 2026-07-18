@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Clapperboard, Compass, LayoutGrid, Library, Search, Settings } from "lucide-react";
+import { SyncStatusBadge } from "@/components/shell/SyncStatusBadge";
 import { cn } from "@/lib/utils/cn";
 import { useAuthStore } from "@/lib/auth/store";
 
@@ -55,7 +56,8 @@ export function AppNav() {
             })}
           </ul>
         </nav>
-        <div className="ml-auto text-sm text-muted-foreground">
+        <div className="ml-auto flex items-center gap-3 text-sm text-muted-foreground">
+          <SyncStatusBadge />
           {profileName ? (
             <span aria-label={`Active profile ${profileName}`}>{profileName}</span>
           ) : null}

@@ -8,6 +8,7 @@ import { cn } from "@/lib/utils/cn";
 interface PosterImageProps {
   src?: string | null;
   alt: string;
+  decorative?: boolean;
   className?: string;
   sizes?: string;
   priority?: boolean;
@@ -16,8 +17,9 @@ interface PosterImageProps {
 export function PosterImage({
   src,
   alt,
+  decorative = false,
   className,
-  sizes = "(max-width: 640px) 40vw, (max-width: 1024px) 25vw, 180px",
+  sizes = "(max-width: 640px) 50vw, (max-width: 768px) 33vw, (max-width: 1280px) 20vw, 180px",
   priority = false,
 }: PosterImageProps) {
   const [failed, setFailed] = useState(false);
@@ -29,7 +31,9 @@ export function PosterImage({
           "flex h-full w-full items-center justify-center bg-muted text-muted-foreground",
           className,
         )}
-        aria-hidden
+        aria-hidden={decorative || !alt}
+        role={decorative || !alt ? undefined : "img"}
+        aria-label={decorative || !alt ? undefined : alt}
       >
         <Film className="h-8 w-8 opacity-60" />
       </div>
@@ -39,7 +43,7 @@ export function PosterImage({
   return (
     <Image
       src={src}
-      alt={alt}
+      alt={decorative ? "" : alt}
       fill
       unoptimized
       sizes={sizes}

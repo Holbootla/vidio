@@ -126,10 +126,11 @@ export function LibraryView({ profileId }: LibraryViewProps) {
             <li key={entry.media_key} className="group space-y-2">
               <Link
                 href={entryHref(entry)}
+                aria-label={entry.name}
                 className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
                 <div className="relative aspect-[2/3] overflow-hidden rounded-xl bg-muted">
-                  <PosterImage src={entry.poster} alt="" />
+                  <PosterImage src={entry.poster} alt="" decorative />
                 </div>
               </Link>
               <div className="flex items-start justify-between gap-2">

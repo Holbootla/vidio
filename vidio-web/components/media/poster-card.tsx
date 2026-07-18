@@ -42,12 +42,13 @@ export function PosterCard({
     <li className={cn(widthClass, className)}>
       <Link
         href={href}
-        className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+        aria-label={`${item.name}${item.releaseInfo ? `, ${item.releaseInfo}` : ""}`}
+        className="group block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background motion-safe:transition-transform motion-safe:duration-200 motion-safe:group-hover:scale-[1.02] motion-safe:group-focus-visible:scale-[1.02]"
         onMouseEnter={prefetch}
         onFocus={prefetch}
       >
-        <div className="relative aspect-[2/3] overflow-hidden rounded-xl bg-muted shadow-soft transition-transform duration-200 group-hover:scale-[1.02] group-focus-visible:scale-[1.02]">
-          <PosterImage src={item.poster} alt="" />
+        <div className="relative aspect-[2/3] overflow-hidden rounded-xl bg-muted shadow-soft">
+          <PosterImage src={item.poster} alt="" decorative />
         </div>
         <div className="mt-2 space-y-0.5">
           <p className="line-clamp-2 text-sm font-medium leading-snug text-foreground">

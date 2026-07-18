@@ -1,7 +1,7 @@
 "use client";
 
 import { Search } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AddonWarnings } from "@/components/discovery/addon-warnings";
 import { CatalogRowSection, buildManifestMap } from "@/components/media/catalog-row-section";
 import { PosterGrid } from "@/components/media/poster-grid";
@@ -25,11 +25,26 @@ export function SearchView({ profileId }: SearchViewProps) {
   const addonsQuery = useAddonsQuery(profileId);
   const manifestMap = addonsQuery.data ? buildManifestMap(addonsQuery.data) : new Map();
 
+  useEffect(() => {
+    if (sessionStorage.getItem("vidio-focus-search") === "1") {
+      sessionStorage.removeItem("vidio-focus-search");
+      const input = document.getElementById("search-input");
+      if (input instanceof HTMLInputElement) {
+        input.focus();
+        input.select();
+      }
+    }
+  }, []);
+
   return (
     <div className="space-y-6">
       <div className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">Search</h1>
-        <p className="text-muted-foreground">Search across all enabled add-on catalogs.</p>
+        <p className="text-muted-foreground">
+          Search across all enabled add-on catalogs. Press{" "}
+          <kbd className="rounded border border-border px-1.5 py-0.5 font-mono text-xs">/</kbd> from
+          anywhere in the app to focus search.
+        </p>
       </div>
 
       <div className="max-w-xl space-y-2">

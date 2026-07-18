@@ -31,7 +31,7 @@
     --card: #ffffff;
     --card-foreground: #111827;
     --muted: #eef1f8;
-    --muted-foreground: #5b6478;
+    --muted-foreground: #475467;
     --border: #d7deeb;
     --input: #ffffff;
     --ring: #4f6ef7;
@@ -99,4 +99,16 @@ body {
 :focus-visible {
   outline: 2px solid var(--ring);
   outline-offset: 2px;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
 }
