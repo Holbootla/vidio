@@ -13,4 +13,5 @@ export const queryKeys = {
     ["streams", profileId, contentType, videoId] as const,
   subtitles: (profileId: string, contentType: string, id: string) =>
     ["subtitles", profileId, contentType, id] as const,
+  preferences: (profileId: string) => ["preferences", profileId] as const,
 };

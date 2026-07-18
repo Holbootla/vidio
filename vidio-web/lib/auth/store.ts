@@ -9,6 +9,7 @@ interface AuthState {
   profile: Profile | null;
   isBootstrapped: boolean;
   setSession: (session: ClientAuthSession) => void;
+  setProfile: (profile: Profile) => void;
   clearSession: () => void;
   setBootstrapped: (value: boolean) => void;
 }
@@ -24,6 +25,7 @@ export const useAuthStore = create<AuthState>((set) => ({
       accessExpiresAt: session.access_expires_at,
       profile: session.profile,
     }),
+  setProfile: (profile) => set({ profile }),
   clearSession: () =>
     set({
       accessToken: null,
