@@ -233,7 +233,7 @@ export const addonDtoSchema = z.object({
   manifest_id: z.string(),
   name: z.string(),
   version: z.string(),
-  description: z.string().optional(),
+  description: z.string().nullable().optional(),
   enabled: z.boolean(),
   priority: z.number().int(),
   capabilities: addonCapabilitiesSchema,
