@@ -350,6 +350,14 @@ export const handlers = [
     mutableLibrary = mutableLibrary.filter((item) => item.media_key !== mediaKey);
     return new HttpResponse(null, { status: 204 });
   }),
+  http.get(`${profileBase}/sync`, ({ request }) => {
+    const url = new URL(request.url);
+    return HttpResponse.json({
+      changes: [],
+      latest_sequence: Number(url.searchParams.get("after") ?? "0"),
+      has_more: false,
+    });
+  }),
 ];
 
 function authResponse() {
