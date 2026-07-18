@@ -103,4 +103,27 @@ describe("SyncProvider", () => {
   it("uses a modest sync interval", () => {
     expect(SYNC_INTERVAL_MS).toBe(5 * 60 * 1000);
   });
+
+  it("announces sync errors in the live region", async () => {
+    seedAuth();
+    server.use(
+      http.get(`${profileBase}/sync`, () =>
+        HttpResponse.json(
+          {
+            type: "/errors/internal",
+            title: "Server error",
+            status: 500,
+            detail: "sync failed",
+          },
+          { status: 500, headers: { "Content-Type": "application/problem+json" } },
+        ),
+      ),
+    );
+
+    const { container } = renderProvider();
+    await waitFor(() => {
+      const live = container.querySelector('[role="status"][aria-live="polite"]');
+      expect(live).toHaveTextContent(/sync failed|Sync failed/i);
+    });
+  });
 });
