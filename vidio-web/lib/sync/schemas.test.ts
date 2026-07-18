@@ -1,11 +1,23 @@
 import { describe, expect, it } from "vitest";
-import { parseSyncChangePayload, syncChangeSchema, syncPageSchema } from "@/lib/sync/schemas";
+import {
+  parseSyncChangePayload,
+  syncAddonPayloadSchema,
+  syncChangeSchema,
+  syncLibraryPayloadSchema,
+  syncPageSchema,
+  syncPreferencesPayloadSchema,
+  syncProgressPayloadSchema,
+} from "@/lib/sync/schemas";
 import {
   addonSyncChange,
+  addonSyncPayload,
   librarySyncChange,
+  librarySyncPayload,
   malformedLibraryChange,
   preferencesSyncChange,
+  preferencesSyncPayload,
   progressSyncChange,
+  progressSyncPayload,
   syncPage,
 } from "@/test/fixtures/sync";
 
@@ -16,10 +28,19 @@ describe("sync schemas", () => {
     expect(syncChangeSchema.parse(librarySyncChange)).toEqual(librarySyncChange);
   });
 
+  it("parses exact Rust partial wire payloads", () => {
+    expect(syncLibraryPayloadSchema.parse(librarySyncPayload)).toEqual(librarySyncPayload);
+    expect(syncProgressPayloadSchema.parse(progressSyncPayload)).toEqual(progressSyncPayload);
+    expect(syncAddonPayloadSchema.parse(addonSyncPayload)).toEqual(addonSyncPayload);
+    expect(syncPreferencesPayloadSchema.parse(preferencesSyncPayload)).toEqual(
+      preferencesSyncPayload,
+    );
+  });
+
   it("parses kind-specific payloads safely", () => {
     expect(parseSyncChangePayload(librarySyncChange)).toEqual({
       kind: "library",
-      payload: librarySyncChange.payload,
+      payload: librarySyncPayload,
     });
     expect(parseSyncChangePayload(progressSyncChange)?.kind).toBe("progress");
     expect(parseSyncChangePayload(preferencesSyncChange)?.kind).toBe("preferences");

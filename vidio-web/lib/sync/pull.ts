@@ -45,10 +45,9 @@ export async function pullSyncFeed(options: {
       }
     }
 
-    finalCursor = page.latest_sequence;
-    await setSyncCursor(options.profileId, finalCursor);
-
     if (!page.has_more) {
+      finalCursor = page.latest_sequence;
+      await setSyncCursor(options.profileId, finalCursor);
       break;
     }
 
@@ -56,6 +55,9 @@ export async function pullSyncFeed(options: {
     if (lastSequence === undefined) {
       break;
     }
+
+    finalCursor = lastSequence;
+    await setSyncCursor(options.profileId, finalCursor);
     cursor = lastSequence;
   }
 

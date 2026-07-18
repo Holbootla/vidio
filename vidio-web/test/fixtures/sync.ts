@@ -9,12 +9,19 @@ const libraryEntry = libraryEntries[0]!;
 const progressEntry = continueWatchingFixture[0]!;
 const addonEntry = addonListFixture[0]!;
 
+export const librarySyncPayload = {
+  media_key: libraryEntry.media_key,
+  type: libraryEntry.media_type,
+  name: libraryEntry.name,
+  poster: libraryEntry.poster,
+};
+
 export const librarySyncChange: SyncChange = {
   sequence: 1,
   profile_id: PROFILE_ID,
   kind: "library",
   key: libraryEntry.media_key,
-  payload: libraryEntry,
+  payload: librarySyncPayload,
   deleted: false,
   created_at: "2026-01-02T00:00:00Z",
 };
@@ -29,12 +36,21 @@ export const libraryDeleteChange: SyncChange = {
   created_at: "2026-01-02T01:00:00Z",
 };
 
+export const progressSyncPayload = {
+  video_key: progressEntry.video_key,
+  media_key: progressEntry.media_key,
+  position_secs: progressEntry.position_secs,
+  duration_secs: progressEntry.duration_secs,
+  watched: progressEntry.watched,
+  revision: progressEntry.revision,
+};
+
 export const progressSyncChange: SyncChange = {
   sequence: 3,
   profile_id: PROFILE_ID,
   kind: "progress",
   key: progressEntry.video_key,
-  payload: progressEntry,
+  payload: progressSyncPayload,
   deleted: false,
   created_at: "2026-01-03T00:00:00Z",
 };
@@ -49,14 +65,29 @@ export const progressDeleteChange: SyncChange = {
   created_at: "2026-01-03T01:00:00Z",
 };
 
+export const preferencesSyncPayload = {
+  name: "Main",
+  preferences: { ...defaultPreferences, locale: "fr-FR" },
+  version: 2,
+};
+
 export const preferencesSyncChange: SyncChange = {
   sequence: 5,
   profile_id: PROFILE_ID,
   kind: "preferences",
-  key: "preferences",
-  payload: { ...defaultPreferences, locale: "fr-FR" },
+  key: "profile",
+  payload: preferencesSyncPayload,
   deleted: false,
   created_at: "2026-01-04T00:00:00Z",
+};
+
+export const addonSyncPayload = {
+  id: addonEntry.id,
+  manifest_id: addonEntry.manifest_id,
+  name: addonEntry.name,
+  version: addonEntry.version,
+  enabled: addonEntry.enabled,
+  priority: addonEntry.priority,
 };
 
 export const addonSyncChange: SyncChange = {
@@ -64,7 +95,7 @@ export const addonSyncChange: SyncChange = {
   profile_id: PROFILE_ID,
   kind: "addon",
   key: addonEntry.id,
-  payload: addonEntry,
+  payload: addonSyncPayload,
   deleted: false,
   created_at: "2026-01-05T00:00:00Z",
 };
