@@ -1,0 +1,16 @@
+# Build artifacts (must be rebuilt inside the image)
+/target
+
+# VCS and CI
+/.git
+/.github
+
+# Docs and local files not needed for the build
+docs
+**/*.md
+.env
+.env.*
+!.env.example
+
+# Editor/OS noise
+.DS_Store

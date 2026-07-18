@@ -1,0 +1,75 @@
+name: Deploy
+
+# Continuous delivery to Fly.io.
+#
+#   push to `develop`      -> deploy to dev      (app: vidio-dev)
+#   push to `main`         -> deploy to staging  (app: vidio-staging)
+#   push tag `vX.Y.Z`      -> deploy to prod     (app: vidio-prod)
+#   manual run             -> pick the environment
+#
+# Fly builds the image from the Dockerfile with `--remote-only`, so no external
+# container registry is required for this path. Requires the repository secret
+# FLY_API_TOKEN (see docs/deployment-ru.md).
+
+on:
+  push:
+    branches: [develop, main]
+    tags: ["v*.*.*"]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: Target environment
+        required: true
+        type: choice
+        options: [dev, staging, production]
+
+concurrency:
+  # Never run two deploys to the same ref at once; do not cancel an in-flight
+  # production rollout.
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    name: Deploy to Fly.io
+    runs-on: ubuntu-latest
+    # Environments allow per-target secrets and protection rules (e.g. required
+    # reviewers for production) in the GitHub UI.
+    environment: >-
+      ${{ github.event_name == 'workflow_dispatch' && inputs.environment
+          || (startsWith(github.ref, 'refs/tags/v') && 'production')
+          || (github.ref == 'refs/heads/main' && 'staging')
+          || 'dev' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve target app
+        id: target
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            case "${{ inputs.environment }}" in
+              production) app=vidio-prod ;;
+              staging)    app=vidio-staging ;;
+              *)          app=vidio-dev ;;
+            esac
+          elif [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            app=vidio-prod
+          elif [ "${GITHUB_REF}" = "refs/heads/main" ]; then
+            app=vidio-staging
+          else
+            app=vidio-dev
+          fi
+          echo "app=${app}" >> "$GITHUB_OUTPUT"
+          echo "Deploying to ${app}"
+
+      - uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          flyctl deploy \
+            --config fly.toml \
+            --app "${{ steps.target.outputs.app }}" \
+            --remote-only \
+            --strategy rolling
