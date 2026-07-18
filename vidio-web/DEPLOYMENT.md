@@ -27,7 +27,7 @@ Health check: `GET /` (or configure upstream to probe port 3000).
 | Variable                    | Scope        | Notes                                                     |
 | --------------------------- | ------------ | --------------------------------------------------------- |
 | `VIDIO_API_BASE_URL`        | Server (BFF) | Rust API base URL; never expose refresh tokens to browser |
-| `NEXT_PUBLIC_API_BASE_URL`  | Build arg    | Public API URL compiled into the browser bundle            |
+| `NEXT_PUBLIC_API_BASE_URL`  | Build arg    | Public API URL compiled into the browser bundle           |
 | `VIDIO_REFRESH_COOKIE_NAME` | Server       | Defaults to `vidio_refresh_token`                         |
 | `NODE_ENV`                  | Server       | `production` in image                                     |
 
