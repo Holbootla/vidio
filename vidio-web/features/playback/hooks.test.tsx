@@ -79,6 +79,42 @@ describe("playback hooks and api", () => {
     expect((cached as Array<{ position_secs: number }>)[0]?.position_secs).toBe(900);
   });
 
+  it("removes watched progress from continue watching", async () => {
+    const client = new QueryClient({
+      defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
+    });
+    client.setQueryData(["continueWatching", PROFILE_ID], [
+      {
+        profile_id: PROFILE_ID,
+        video_key: "movie:imdb:tt1254207",
+        media_key: "movie:imdb:tt1254207",
+        position_secs: 900,
+        duration_secs: 3600,
+        watched: false,
+        revision: 1,
+        last_device_id: null,
+        updated_at: "2026-01-03T00:00:00Z",
+      },
+    ]);
+    const wrapper = ({ children }: { children: React.ReactNode }) => (
+      <QueryClientProvider client={client}>{children}</QueryClientProvider>
+    );
+
+    const { result } = renderHook(() => useProgressMutation(PROFILE_ID), { wrapper });
+    result.current.mutate({
+      content_type: "movie",
+      video_id: "tt1254207",
+      media_id: "tt1254207",
+      manifest_id: "org.stremio.cinemeta",
+      position_secs: 3600,
+      duration_secs: 3600,
+      watched: true,
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(client.getQueryData(["continueWatching", PROFILE_ID])).toEqual([]);
+  });
+
   it("uses uncached stream query options", async () => {
     const { result } = renderHook(() => useStreamsQuery(PROFILE_ID, "movie", "tt1254207"), {
       wrapper: createWrapper(),

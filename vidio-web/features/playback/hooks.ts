@@ -47,6 +47,9 @@ function upsertContinueWatching(
 ): PlaybackProgress[] {
   const current = entries ?? [];
   const without = current.filter((entry) => entry.video_key !== progress.video_key);
+  if (progress.watched) {
+    return without;
+  }
   const next = [progress, ...without];
   return next.slice(0, 50);
 }
