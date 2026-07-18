@@ -9,4 +9,8 @@ export const queryKeys = {
     ["meta", profileId, contentType, id] as const,
   library: (profileId: string) => ["library", profileId] as const,
   continueWatching: (profileId: string) => ["continueWatching", profileId] as const,
+  streams: (profileId: string, contentType: string, videoId: string) =>
+    ["streams", profileId, contentType, videoId] as const,
+  subtitles: (profileId: string, contentType: string, id: string) =>
+    ["subtitles", profileId, contentType, id] as const,
 };

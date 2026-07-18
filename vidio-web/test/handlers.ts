@@ -8,6 +8,12 @@ import {
   movieMeta,
   seriesMeta,
 } from "@/test/fixtures/browse";
+import {
+  continueWatchingFixture,
+  progressResponseFixture,
+  streamResolutionFixture,
+  subtitleResolutionFixture,
+} from "@/test/fixtures/playback";
 
 const API_BASE = "http://localhost:8080";
 const profileBase = `${API_BASE}/v1/profiles/${PROFILE_ID}`;
@@ -130,7 +136,22 @@ export const handlers = [
     }
     return HttpResponse.json(movieMeta);
   }),
-  http.get(`${profileBase}/continue-watching`, () => HttpResponse.json([])),
+  http.get(`${profileBase}/continue-watching`, () => HttpResponse.json(continueWatchingFixture)),
+  http.get(`${profileBase}/streams/:contentType/:videoId`, () =>
+    HttpResponse.json(streamResolutionFixture),
+  ),
+  http.get(`${profileBase}/subtitles/:contentType/:id`, () =>
+    HttpResponse.json(subtitleResolutionFixture),
+  ),
+  http.put(`${profileBase}/progress`, async ({ request }) => {
+    const body = (await request.json()) as Record<string, unknown>;
+    return HttpResponse.json({
+      ...progressResponseFixture,
+      position_secs: body.position_secs ?? progressResponseFixture.position_secs,
+      duration_secs: body.duration_secs ?? progressResponseFixture.duration_secs,
+      watched: body.watched ?? progressResponseFixture.watched,
+    });
+  }),
   http.get(`${profileBase}/addons`, () => HttpResponse.json(addons)),
   http.get(`${profileBase}/library`, () => HttpResponse.json(mutableLibrary)),
   http.post(`${profileBase}/library`, async ({ request }) => {

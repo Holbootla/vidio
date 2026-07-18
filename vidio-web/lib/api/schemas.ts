@@ -243,6 +243,84 @@ export const addonDtoSchema = z.object({
 
 export type AddonDto = z.infer<typeof addonDtoSchema>;
 
+export const subtitleSchema = z.object({
+  id: z.string(),
+  url: z.string(),
+  lang: z.string(),
+});
+
+export type Subtitle = z.infer<typeof subtitleSchema>;
+
+export const streamBehaviorHintsSchema = z.object({
+  notWebReady: z.boolean().optional(),
+  bingeGroup: z.string().optional(),
+  countryWhitelist: z.array(z.string()).default([]),
+  proxyHeaders: z
+    .object({
+      request: z.record(z.string(), z.string()).optional(),
+      response: z.record(z.string(), z.string()).optional(),
+    })
+    .optional(),
+  videoHash: z.string().optional(),
+  videoSize: z.number().int().optional(),
+  filename: z.string().optional(),
+});
+
+export type StreamBehaviorHints = z.infer<typeof streamBehaviorHintsSchema>;
+
+export const streamSchema = z.object({
+  name: z.string().optional(),
+  title: z.string().optional(),
+  description: z.string().optional(),
+  url: z.string().optional(),
+  ytId: z.string().optional(),
+  infoHash: z.string().optional(),
+  fileIdx: z.number().int().optional(),
+  externalUrl: z.string().optional(),
+  sources: z.array(z.string()).default([]),
+  subtitles: z.array(subtitleSchema).default([]),
+  behaviorHints: streamBehaviorHintsSchema.optional(),
+});
+
+export type Stream = z.infer<typeof streamSchema>;
+
+export const streamKindSchema = z.enum(["url", "youtube", "torrent", "external", "unknown"]);
+
+export type StreamKind = z.infer<typeof streamKindSchema>;
+
+export const resolvedStreamSchema = z.object({
+  installation_id: uuid,
+  addon_name: z.string(),
+  kind: streamKindSchema,
+  is_web_ready: z.boolean(),
+  supported: z.boolean(),
+  stream: streamSchema,
+});
+
+export type ResolvedStream = z.infer<typeof resolvedStreamSchema>;
+
+export const streamResolutionSchema = z.object({
+  streams: z.array(resolvedStreamSchema),
+  warnings: z.array(addonWarningSchema),
+});
+
+export type StreamResolution = z.infer<typeof streamResolutionSchema>;
+
+export const resolvedSubtitleSchema = z.object({
+  installation_id: uuid,
+  addon_name: z.string(),
+  subtitle: subtitleSchema,
+});
+
+export type ResolvedSubtitle = z.infer<typeof resolvedSubtitleSchema>;
+
+export const subtitleResolutionSchema = z.object({
+  subtitles: z.array(resolvedSubtitleSchema),
+  warnings: z.array(addonWarningSchema),
+});
+
+export type SubtitleResolution = z.infer<typeof subtitleResolutionSchema>;
+
 export const libraryEntriesSchema = z.array(libraryEntrySchema);
 export const playbackProgressListSchema = z.array(playbackProgressSchema);
 export const addonListSchema = z.array(addonDtoSchema);
