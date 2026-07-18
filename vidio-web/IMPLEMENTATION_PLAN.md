@@ -1,10 +1,10 @@
 # Vidio web — implementation plan
 
-Turns §13 milestones from `docs/frontend-web-v1-plan.md` into an ordered, contract-aware build plan for `vidio-web/`. Stack and BFF rules from the product plan apply unchanged (Next.js App Router, TanStack Query, Zustand for player/UI only, Zod-validated fetch client, BFF-only refresh cookie).
+Turns the Vidio web v1 product plan into an ordered, contract-aware build plan for this repository. Stack and BFF rules apply unchanged (Next.js App Router, TanStack Query, Zustand for player/UI only, Zod-validated fetch client, BFF-only refresh cookie).
 
-**App root:** `vidio-web/` (maps to the `web/` tree in the product plan).
+**App root:** repository root (maps to the `web/` tree in the product plan).
 
-**Backend source of truth:** `crates/http-api/src/routes.rs`, `dto.rs`, plus application/domain response shapes. No OpenAPI artifact yet — Zod schemas are hand-written from those types.
+**Backend source of truth:** the Vidio Rust API (`/v1` routes and DTOs). No OpenAPI artifact yet — Zod schemas are hand-written from those types.
 
 ---
 

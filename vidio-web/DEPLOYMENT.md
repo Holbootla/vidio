@@ -8,7 +8,7 @@ Production image uses Next.js `standalone` output (see `next.config.ts`).
 docker build \
   --build-arg NEXT_PUBLIC_API_BASE_URL=https://api.example.com \
   -t vidio-web:latest \
-  ./vidio-web
+  .
 ```
 
 ## Run container
@@ -42,4 +42,4 @@ Health check: `GET /` (or configure upstream to probe port 3000).
 
 ## CI
 
-GitHub Actions workflow: `.github/workflows/vidio-web.yml` (working directory `vidio-web`).
+GitHub Actions workflow: `.github/workflows/ci.yml`.
