@@ -13,6 +13,8 @@ accessing content they are authorized to.
 First backend implementation. The full feature set, decisions and roadmap live in
 [`docs/backend-architecture.md`](docs/backend-architecture.md). The web frontend
 plan lives in [`docs/frontend-web-v1-plan.md`](docs/frontend-web-v1-plan.md).
+A step-by-step run & deploy guide (in Russian) is in
+[`docs/deployment-ru.md`](docs/deployment-ru.md).
 
 Implemented and tested:
 
