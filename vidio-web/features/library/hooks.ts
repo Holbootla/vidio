@@ -5,6 +5,12 @@ import { queryKeys } from "@/lib/api/query-keys";
 import { addLibraryItem, fetchLibrary, removeLibraryItem } from "@/features/library/api";
 import type { AddLibraryRequest, LibraryEntry } from "@/lib/api/schemas";
 import { buildMediaKey } from "@/lib/media/keys";
+import {
+  offlineLibraryEntry,
+  queueLibraryAdd,
+  queueLibraryRemove,
+  shouldUseOfflineQueue,
+} from "@/lib/sync/offlineMutations";
 
 export function useLibraryQuery(profileId: string | null) {
   return useQuery({
@@ -16,29 +22,27 @@ export function useLibraryQuery(profileId: string | null) {
 }
 
 function optimisticEntry(profileId: string, request: AddLibraryRequest): LibraryEntry | null {
-  const keyResult = buildMediaKey(request.content_type, request.manifest_id, request.content_id);
-  if (!keyResult.ok) {
-    return null;
-  }
-  const now = new Date().toISOString();
-  return {
-    profile_id: profileId,
-    media_key: keyResult.key,
-    media_type: request.content_type,
-    name: request.name,
-    poster: request.poster ?? null,
-    meta_snapshot: request.meta_snapshot ?? null,
-    removed: false,
-    added_at: now,
-    updated_at: now,
-  };
+  return offlineLibraryEntry(profileId, request);
 }
 
 export function useAddToLibraryMutation(profileId: string | null) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: AddLibraryRequest) => addLibraryItem(profileId!, payload),
+    mutationFn: async (payload: AddLibraryRequest) => {
+      if (!profileId) {
+        throw new Error("Profile is required");
+      }
+      if (shouldUseOfflineQueue()) {
+        await queueLibraryAdd(profileId, payload);
+        const entry = offlineLibraryEntry(profileId, payload);
+        if (!entry) {
+          throw new Error("Unable to build library entry");
+        }
+        return entry;
+      }
+      return addLibraryItem(profileId, payload);
+    },
     onMutate: async (payload) => {
       if (!profileId) {
         return;
@@ -61,10 +65,11 @@ export function useAddToLibraryMutation(profileId: string | null) {
       }
       queryClient.setQueryData(queryKeys.library(profileId), context.previous);
     },
-    onSettled: () => {
-      if (profileId) {
-        void queryClient.invalidateQueries({ queryKey: queryKeys.library(profileId) });
+    onSettled: (_data, _error, _payload) => {
+      if (!profileId || shouldUseOfflineQueue()) {
+        return;
       }
+      void queryClient.invalidateQueries({ queryKey: queryKeys.library(profileId) });
     },
   });
 }
@@ -73,7 +78,16 @@ export function useRemoveFromLibraryMutation(profileId: string | null) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (mediaKey: string) => removeLibraryItem(profileId!, mediaKey),
+    mutationFn: async (mediaKey: string) => {
+      if (!profileId) {
+        throw new Error("Profile is required");
+      }
+      if (shouldUseOfflineQueue()) {
+        await queueLibraryRemove(profileId, mediaKey);
+        return;
+      }
+      return removeLibraryItem(profileId, mediaKey);
+    },
     onMutate: async (mediaKey) => {
       if (!profileId) {
         return;
@@ -93,9 +107,10 @@ export function useRemoveFromLibraryMutation(profileId: string | null) {
       queryClient.setQueryData(queryKeys.library(profileId), context.previous);
     },
     onSettled: () => {
-      if (profileId) {
-        void queryClient.invalidateQueries({ queryKey: queryKeys.library(profileId) });
+      if (!profileId || shouldUseOfflineQueue()) {
+        return;
       }
+      void queryClient.invalidateQueries({ queryKey: queryKeys.library(profileId) });
     },
   });
 }
@@ -105,4 +120,9 @@ export function isInLibrary(entries: LibraryEntry[] | undefined, mediaKey: strin
     return false;
   }
   return entries.some((entry) => entry.media_key === mediaKey && !entry.removed);
+}
+
+export function libraryMediaKeyFromRequest(request: AddLibraryRequest): string | null {
+  const keyResult = buildMediaKey(request.content_type, request.manifest_id, request.content_id);
+  return keyResult.ok ? keyResult.key : null;
 }

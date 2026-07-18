@@ -5,6 +5,11 @@ import { queryKeys } from "@/lib/api/query-keys";
 import type { ProfilePreferences } from "@/lib/api/schemas";
 import { useAuthStore } from "@/lib/auth/store";
 import { fetchPreferences, updatePreferences } from "@/features/settings/api";
+import {
+  offlineProfileAfterPreferences,
+  queuePreferences,
+  shouldUseOfflineQueue,
+} from "@/lib/sync/offlineMutations";
 
 function invalidateStreamQueries(
   queryClient: ReturnType<typeof useQueryClient>,
@@ -43,7 +48,20 @@ export function useUpdatePreferencesMutation(profileId: string | null) {
   const previousHideP2p = useAuthStore((state) => state.profile?.preferences.hide_p2p_streams);
 
   return useMutation({
-    mutationFn: (preferences: ProfilePreferences) => updatePreferences(profileId!, preferences),
+    mutationFn: async (preferences: ProfilePreferences) => {
+      if (!profileId) {
+        throw new Error("Profile is required");
+      }
+      if (shouldUseOfflineQueue()) {
+        await queuePreferences(profileId, preferences);
+        const profile = useAuthStore.getState().profile;
+        if (!profile) {
+          throw new Error("Profile is required");
+        }
+        return offlineProfileAfterPreferences(profile, preferences);
+      }
+      return updatePreferences(profileId, preferences);
+    },
     onSuccess: (profile, preferences) => {
       if (!profileId) {
         return;

@@ -5,6 +5,11 @@ import { queryKeys } from "@/lib/api/query-keys";
 import type { PlaybackProgress, ProgressRequest } from "@/lib/api/schemas";
 import { buildMediaKey } from "@/lib/media/keys";
 import { fetchStreams, fetchSubtitles, putProgress } from "@/features/playback/api";
+import {
+  offlinePlaybackProgress,
+  queueProgress,
+  shouldUseOfflineQueue,
+} from "@/lib/sync/offlineMutations";
 
 export function useStreamsQuery(
   profileId: string | null,
@@ -50,7 +55,29 @@ export function useProgressMutation(profileId: string | null) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (payload: ProgressRequest) => putProgress(profileId!, payload),
+    mutationFn: async (payload: ProgressRequest) => {
+      if (!profileId) {
+        throw new Error("Profile is required");
+      }
+      if (shouldUseOfflineQueue()) {
+        await queueProgress(profileId, payload);
+        const cwKey = queryKeys.continueWatching(profileId);
+        const previous = queryClient.getQueryData<PlaybackProgress[]>(cwKey)?.find((entry) => {
+          const keyResult = buildMediaKey(
+            payload.content_type,
+            payload.manifest_id,
+            payload.video_id,
+          );
+          return keyResult.ok && entry.video_key === keyResult.key;
+        });
+        const progress = offlinePlaybackProgress(profileId, payload, previous);
+        if (!progress) {
+          throw new Error("Unable to build progress entry");
+        }
+        return progress;
+      }
+      return putProgress(profileId, payload);
+    },
     onSuccess: (progress) => {
       if (!profileId) {
         return;
@@ -61,9 +88,10 @@ export function useProgressMutation(profileId: string | null) {
       );
     },
     onSettled: () => {
-      if (profileId) {
-        void queryClient.invalidateQueries({ queryKey: queryKeys.continueWatching(profileId) });
+      if (!profileId || shouldUseOfflineQueue()) {
+        return;
       }
+      void queryClient.invalidateQueries({ queryKey: queryKeys.continueWatching(profileId) });
     },
   });
 }
