@@ -9,8 +9,7 @@ import { EmptyState } from "@/components/ui/empty-state";
 import { QueryErrorState } from "@/components/ui/query-status";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRemoveFromLibraryMutation, useLibraryQuery } from "@/features/library/hooks";
-import { buildDetailHref } from "@/lib/media/provenance";
-import type { LibraryEntry } from "@/lib/api/schemas";
+import { buildLibraryEntryHref } from "@/features/library/entry-href";
 import { cn } from "@/lib/utils/cn";
 
 const MEDIA_FILTERS = [
@@ -20,13 +19,6 @@ const MEDIA_FILTERS = [
 ] as const;
 
 type MediaFilter = (typeof MEDIA_FILTERS)[number]["value"];
-
-function entryHref(entry: LibraryEntry): string {
-  const parts = entry.media_key.split(":");
-  const contentType = parts[0] ?? entry.media_type;
-  const contentId = parts.slice(2).join(":") || entry.media_key;
-  return buildDetailHref(contentType, contentId);
-}
 
 interface LibraryViewProps {
   profileId: string;
@@ -125,7 +117,7 @@ export function LibraryView({ profileId }: LibraryViewProps) {
           {filtered.map((entry) => (
             <li key={entry.media_key} className="group space-y-2">
               <Link
-                href={entryHref(entry)}
+                href={buildLibraryEntryHref(entry)}
                 aria-label={entry.name}
                 className="block rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
               >
@@ -136,7 +128,7 @@ export function LibraryView({ profileId }: LibraryViewProps) {
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
                   <Link
-                    href={entryHref(entry)}
+                    href={buildLibraryEntryHref(entry)}
                     className="line-clamp-2 text-sm font-medium hover:text-primary"
                   >
                     {entry.name}
