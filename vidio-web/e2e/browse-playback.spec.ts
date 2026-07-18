@@ -33,17 +33,21 @@ test.describe("browse and playback", () => {
     await page.keyboard.press("Escape");
     await expect(page.getByRole("dialog")).toHaveCount(0);
 
-    await page.request.put(`${MOCK_API}/v1/profiles/${PROFILE_ID}/progress`, {
-      data: {
-        content_type: "movie",
-        video_id: "tt1254207",
-        media_id: "tt1254207",
-        manifest_id: "org.stremio.cinemeta",
-        position_secs: 600,
-        duration_secs: 3600,
-        watched: false,
+    const progressResponse = await page.request.put(
+      `${MOCK_API}/v1/profiles/${PROFILE_ID}/progress`,
+      {
+        data: {
+          content_type: "movie",
+          video_id: "tt1254207",
+          media_id: "tt1254207",
+          manifest_id: "org.stremio.cinemeta",
+          position_secs: 600,
+          duration_secs: 3600,
+          watched: false,
+        },
       },
-    });
+    );
+    expect(progressResponse.ok()).toBe(true);
 
     await page.goto("/board");
     await expect(page.getByRole("heading", { name: "Continue watching" })).toBeVisible();
