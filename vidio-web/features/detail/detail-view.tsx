@@ -8,6 +8,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { EpisodePicker } from "@/features/detail/episode-picker";
 import { useMetaQuery } from "@/features/detail/hooks";
 import { MetaHero } from "@/features/detail/meta-hero";
+import { SourcesPanel } from "@/features/playback/sources-panel";
 import { buildLibraryRequest } from "@/features/library/build-request";
 import {
   isInLibrary,
@@ -15,8 +16,10 @@ import {
   useLibraryQuery,
   useRemoveFromLibraryMutation,
 } from "@/features/library/hooks";
+import { useProfileContext } from "@/components/providers/ProfileProvider";
 import { buildMediaKey, resolveManifestIdForLibrary } from "@/lib/media/keys";
 import { parseProvenanceFromSearchParams } from "@/lib/media/provenance";
+import type { Video } from "@/lib/api/schemas";
 
 interface DetailViewProps {
   profileId: string;
@@ -26,12 +29,14 @@ interface DetailViewProps {
 }
 
 export function DetailView({ profileId, contentType, id, searchParams }: DetailViewProps) {
+  const { profile } = useProfileContext();
   const provenance = parseProvenanceFromSearchParams(searchParams);
   const metaQuery = useMetaQuery(profileId, contentType, id);
   const libraryQuery = useLibraryQuery(profileId);
   const addMutation = useAddToLibraryMutation(profileId);
   const removeMutation = useRemoveFromLibraryMutation(profileId);
   const [statusMessage, setStatusMessage] = useState<string | null>(null);
+  const [selectedEpisode, setSelectedEpisode] = useState<Video | null>(null);
 
   const mediaKey = useMemo(() => {
     if (!metaQuery.data) {
@@ -59,6 +64,13 @@ export function DetailView({ profileId, contentType, id, searchParams }: DetailV
 
   const libraryBlockedReason =
     libraryRequestResult && !libraryRequestResult.ok ? libraryRequestResult.reason : null;
+
+  const activeVideoId = useMemo(() => {
+    if (metaQuery.data?.videos.length) {
+      return selectedEpisode?.id ?? metaQuery.data.videos[0]?.id ?? metaQuery.data.id;
+    }
+    return metaQuery.data?.id ?? id;
+  }, [id, metaQuery.data, selectedEpisode?.id]);
 
   useEffect(() => {
     if (addMutation.isError) {
@@ -140,7 +152,35 @@ export function DetailView({ profileId, contentType, id, searchParams }: DetailV
             </p>
           ) : null}
           {metaQuery.data.videos.length > 0 ? (
-            <EpisodePicker videos={metaQuery.data.videos} />
+            <EpisodePicker
+              videos={metaQuery.data.videos}
+              selectedId={selectedEpisode?.id}
+              onSelect={setSelectedEpisode}
+              contentType={metaQuery.data.type}
+              mediaId={metaQuery.data.id}
+              provenance={provenance}
+              preferredQualities={profile?.preferences.preferred_qualities}
+            />
+          ) : (
+            <SourcesPanel
+              profileId={profileId}
+              contentType={metaQuery.data.type}
+              videoId={activeVideoId}
+              mediaId={metaQuery.data.id}
+              provenance={provenance}
+              preferredQualities={profile?.preferences.preferred_qualities}
+            />
+          )}
+          {metaQuery.data.videos.length > 0 ? (
+            <SourcesPanel
+              profileId={profileId}
+              contentType={metaQuery.data.type}
+              videoId={activeVideoId}
+              mediaId={metaQuery.data.id}
+              provenance={provenance}
+              preferredQualities={profile?.preferences.preferred_qualities}
+              heading="Episode sources"
+            />
           ) : null}
         </>
       ) : null}

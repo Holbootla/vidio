@@ -3,12 +3,17 @@
 import { useMemo, useState } from "react";
 import { PosterImage } from "@/components/media/poster-image";
 import type { Video } from "@/lib/api/schemas";
+import type { MediaProvenance } from "@/lib/media/provenance";
 import { cn } from "@/lib/utils/cn";
 
 interface EpisodePickerProps {
   videos: Video[];
   selectedId?: string | null;
   onSelect?: (video: Video) => void;
+  contentType?: string;
+  mediaId?: string;
+  provenance?: MediaProvenance | null;
+  preferredQualities?: string[];
 }
 
 function episodeLabel(video: Video): string {
