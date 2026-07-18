@@ -11,7 +11,10 @@
     "format:check": "oxfmt --check",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "perf:check": "node scripts/check-performance.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "5.2.2",
@@ -36,6 +39,8 @@
     "zustand": "5.0.14"
   },
   "devDependencies": {
+    "@axe-core/playwright": "4.10.2",
+    "@playwright/test": "1.55.0",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
