@@ -100,3 +100,149 @@ export const clientAuthSessionSchema = z.object({
 });
 
 export type ClientAuthSession = z.infer<typeof clientAuthSessionSchema>;
+
+export const metaPreviewSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  name: z.string(),
+  poster: z.string().optional(),
+  posterShape: z.string().optional(),
+  description: z.string().optional(),
+  releaseInfo: z.string().optional(),
+  imdbRating: z.string().optional(),
+  genres: z.array(z.string()).default([]),
+});
+
+export type MetaPreview = z.infer<typeof metaPreviewSchema>;
+
+export const videoSchema = z.object({
+  id: z.string(),
+  title: z.string().optional(),
+  released: z.string().optional(),
+  season: z.number().int().optional(),
+  episode: z.number().int().optional(),
+  thumbnail: z.string().optional(),
+  overview: z.string().optional(),
+});
+
+export type Video = z.infer<typeof videoSchema>;
+
+export const metaSchema = z.object({
+  id: z.string(),
+  type: z.string(),
+  name: z.string(),
+  poster: z.string().optional(),
+  background: z.string().optional(),
+  logo: z.string().optional(),
+  description: z.string().optional(),
+  releaseInfo: z.string().optional(),
+  runtime: z.string().optional(),
+  imdbRating: z.string().optional(),
+  genres: z.array(z.string()).default([]),
+  videos: z.array(videoSchema).default([]),
+});
+
+export type Meta = z.infer<typeof metaSchema>;
+
+export const addonWarningSchema = z.object({
+  installation_id: uuid,
+  addon_name: z.string(),
+  message: z.string(),
+});
+
+export type AddonWarning = z.infer<typeof addonWarningSchema>;
+
+export const catalogRowSchema = z.object({
+  installation_id: uuid,
+  addon_name: z.string(),
+  catalog_id: z.string(),
+  content_type: z.string(),
+  title: z.string(),
+  items: z.array(metaPreviewSchema),
+});
+
+export type CatalogRow = z.infer<typeof catalogRowSchema>;
+
+export const discoveryResponseSchema = z.object({
+  rows: z.array(catalogRowSchema),
+  warnings: z.array(addonWarningSchema),
+});
+
+export type DiscoveryResponse = z.infer<typeof discoveryResponseSchema>;
+
+export const playbackProgressSchema = z.object({
+  profile_id: uuid,
+  video_key: z.string(),
+  media_key: z.string(),
+  position_secs: z.number(),
+  duration_secs: z.number(),
+  watched: z.boolean(),
+  revision: z.number().int().nonnegative(),
+  last_device_id: uuid.nullable().optional(),
+  updated_at: rfc3339,
+});
+
+export type PlaybackProgress = z.infer<typeof playbackProgressSchema>;
+
+export const progressRequestSchema = z.object({
+  content_type: z.string(),
+  video_id: z.string(),
+  media_id: z.string(),
+  manifest_id: z.string(),
+  position_secs: z.number(),
+  duration_secs: z.number(),
+  watched: z.boolean().optional(),
+  device_id: uuid.optional(),
+});
+
+export type ProgressRequest = z.infer<typeof progressRequestSchema>;
+
+export const libraryEntrySchema = z.object({
+  profile_id: uuid,
+  media_key: z.string(),
+  media_type: z.string(),
+  name: z.string(),
+  poster: z.string().nullable().optional(),
+  meta_snapshot: z.string().nullable().optional(),
+  removed: z.boolean(),
+  added_at: rfc3339,
+  updated_at: rfc3339,
+});
+
+export type LibraryEntry = z.infer<typeof libraryEntrySchema>;
+
+export const addLibraryRequestSchema = z.object({
+  content_type: z.string(),
+  content_id: z.string(),
+  manifest_id: z.string(),
+  name: z.string(),
+  poster: z.string().optional(),
+  meta_snapshot: z.string().optional(),
+});
+
+export type AddLibraryRequest = z.infer<typeof addLibraryRequestSchema>;
+
+export const addonCapabilitiesSchema = z.object({
+  resources: z.array(z.string()),
+  types: z.array(z.string()),
+  id_prefixes: z.array(z.string()),
+});
+
+export const addonDtoSchema = z.object({
+  id: uuid,
+  manifest_id: z.string(),
+  name: z.string(),
+  version: z.string(),
+  description: z.string().optional(),
+  enabled: z.boolean(),
+  priority: z.number().int(),
+  capabilities: addonCapabilitiesSchema,
+  installed_at: rfc3339,
+  updated_at: rfc3339,
+});
+
+export type AddonDto = z.infer<typeof addonDtoSchema>;
+
+export const libraryEntriesSchema = z.array(libraryEntrySchema);
+export const playbackProgressListSchema = z.array(playbackProgressSchema);
+export const addonListSchema = z.array(addonDtoSchema);

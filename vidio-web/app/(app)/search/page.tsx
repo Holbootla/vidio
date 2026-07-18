@@ -1,14 +1,12 @@
-import { getTranslations } from "next-intl/server";
+"use client";
 
-export default async function SearchPlaceholderPage() {
-  const t = await getTranslations("nav");
+import { SearchView } from "@/features/discovery/search-view";
+import { useProfileContext } from "@/components/providers/ProfileProvider";
 
-  return (
-    <section className="space-y-3">
-      <h1 className="text-3xl font-semibold tracking-tight">{t("search")}</h1>
-      <p className="max-w-2xl text-muted-foreground">
-        Cross-catalog search will connect to aggregated discovery results in Milestone 2.
-      </p>
-    </section>
-  );
+export default function SearchPage() {
+  const { profileId } = useProfileContext();
+  if (!profileId) {
+    return null;
+  }
+  return <SearchView profileId={profileId} />;
 }

@@ -1,14 +1,12 @@
-import { getTranslations } from "next-intl/server";
+"use client";
 
-export default async function LibraryPlaceholderPage() {
-  const t = await getTranslations("nav");
+import { LibraryView } from "@/features/library/library-view";
+import { useProfileContext } from "@/components/providers/ProfileProvider";
 
-  return (
-    <section className="space-y-3">
-      <h1 className="text-3xl font-semibold tracking-tight">{t("library")}</h1>
-      <p className="max-w-2xl text-muted-foreground">
-        Saved titles and library management will appear here in Milestone 2.
-      </p>
-    </section>
-  );
+export default function LibraryPage() {
+  const { profileId } = useProfileContext();
+  if (!profileId) {
+    return null;
+  }
+  return <LibraryView profileId={profileId} />;
 }
