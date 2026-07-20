@@ -29,17 +29,31 @@ GitHub Actions), уже готово в репозитории. Ниже отм�
 
 Нужен установленный **Docker** (с Docker Compose).
 
-1. ✋ Сгенерируйте секрет для токенов (нужен один раз, минимум 32 байта):
+1. ✋ (по желанию) Скопируйте пример env и задайте свой секрет (≥ 32 байта).
+   Для локали можно пропустить — compose подставит тестовый секрет из
+   `.env.example`.
 
    ```bash
+   cp .env.example .env
+   # в .env замените VIDIO_ACCESS_TOKEN_SECRET на вывод:
    openssl rand -base64 48
    ```
 
-2. ✋ Запустите бэкенд, подставив этот секрет:
+   В **PowerShell** (не bash):
+
+   ```powershell
+   Copy-Item .env.example .env
+   # затем откройте .env и вставьте секрет, либо:
+   $env:VIDIO_ACCESS_TOKEN_SECRET = openssl rand -base64 48
+   ```
+
+2. ✋ Запустите бэкенд:
 
    ```bash
-   VIDIO_ACCESS_TOKEN_SECRET="сюда-вставьте-секрет" docker compose up --build
+   docker compose up --build
    ```
+
+   В PowerShell та же команда: `docker compose up --build`.
 
 3. 🤖 Соберётся образ и поднимутся два сервиса: `api` (порт 8080) и `worker`.
 
@@ -51,6 +65,32 @@ GitHub Actions), уже готово в репозитории. Ниже отм�
    ```
 
 Остановить: `Ctrl+C`, затем при желании `docker compose down`.
+
+### Фронтенд vidio-web против этого бэкенда
+
+Регистрация/логин идут через BFF Next.js. Ему нужен **server-only**
+`VIDIO_API_BASE_URL`. Без него UI покажет:
+
+```json
+{"type":"/errors/internal","status":500,"detail":"VIDIO_API_BASE_URL is not configured"}
+```
+
+✋ В репозитории **vidio-web** создайте `.env.local` (не в этом репо):
+
+```bash
+# из корня vidio:
+cp examples/vidio-web.env.local /path/to/vidio-web/.env.local
+```
+
+Или вручную в `vidio-web/.env.local`:
+
+```env
+NEXT_PUBLIC_API_BASE_URL=http://localhost:8080
+VIDIO_API_BASE_URL=http://localhost:8080
+VIDIO_REFRESH_COOKIE_NAME=vidio_refresh_token
+```
+
+Без суффикса `/v1`. Перезапустите `pnpm dev`, чтобы Next подхватил env.
 
 ### Вариант B. Без Docker (через Rust)
 

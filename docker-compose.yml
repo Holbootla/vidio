@@ -1,7 +1,13 @@
 # Local / small self-hosted deployment.
 #
-# Usage:
-#   VIDIO_ACCESS_TOKEN_SECRET=$(openssl rand -base64 48) docker compose up --build
+# Usage (any shell, including PowerShell):
+#   docker compose up --build
+#
+# Optional: copy `.env.example` → `.env` and set a real secret. Compose loads
+# `.env` automatically. The default below is for local only — never ship it.
+#
+# Frontend (vidio-web): copy `examples/vidio-web.env.local` into that repo as
+# `.env.local` so registration/login BFF calls find VIDIO_API_BASE_URL.
 #
 # Storage is currently in-memory, so `api` and `worker` do not share state and
 # the worker is a heartbeat skeleton. Both are included so the topology matches
@@ -16,7 +22,7 @@ services:
       - "8080:8080"
     environment:
       VIDIO_BIND_ADDR: 0.0.0.0:8080
-      VIDIO_ACCESS_TOKEN_SECRET: ${VIDIO_ACCESS_TOKEN_SECRET:?set VIDIO_ACCESS_TOKEN_SECRET (>=32 bytes)}
+      VIDIO_ACCESS_TOKEN_SECRET: ${VIDIO_ACCESS_TOKEN_SECRET:-change-me-in-production-min-32-bytes-long}
       VIDIO_ACCESS_TOKEN_TTL_SECS: ${VIDIO_ACCESS_TOKEN_TTL_SECS:-900}
       VIDIO_REFRESH_TOKEN_TTL_SECS: ${VIDIO_REFRESH_TOKEN_TTL_SECS:-2592000}
       VIDIO_ADDON_FETCH_TIMEOUT_MS: ${VIDIO_ADDON_FETCH_TIMEOUT_MS:-8000}

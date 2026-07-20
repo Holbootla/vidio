@@ -89,6 +89,37 @@ See [`.env.example`](.env.example). Key variables:
 | `VIDIO_ADDON_MAX_RESPONSE_BYTES` | `5242880` | Add-on response size cap |
 | `VIDIO_ADDON_ALLOW_PRIVATE_NETWORKS` | `false` | Dev only: allow private/HTTP add-on targets |
 
+### Docker (local)
+
+```bash
+# Works in bash, PowerShell, and cmd — no one-liner secret required for local
+docker compose up --build
+```
+
+Optional: `cp .env.example .env` and replace `VIDIO_ACCESS_TOKEN_SECRET` with a
+real value (`openssl rand -base64 48`). Compose reads `.env` automatically.
+
+### Running with [vidio-web](https://github.com/Holbootla/vidio-web)
+
+Registration/login go through the Next.js BFF, which calls this API using
+**server-only** `VIDIO_API_BASE_URL`. If that env var is missing you get:
+
+```json
+{"type":"/errors/internal","title":"Internal server error","status":500,"detail":"VIDIO_API_BASE_URL is not configured"}
+```
+
+Fix — in the **vidio-web** repo (not this one):
+
+```bash
+cp /path/to/vidio/examples/vidio-web.env.local /path/to/vidio-web/.env.local
+# or: cp .env.example .env.local  (inside vidio-web)
+pnpm dev
+```
+
+Both `NEXT_PUBLIC_API_BASE_URL` and `VIDIO_API_BASE_URL` must be the API origin
+(`http://localhost:8080`) with **no** `/v1` suffix. Restart the Next.js dev
+server after changing env files.
+
 ## API overview
 
 All endpoints are versioned under `/v1`. Errors use `application/problem+json`
